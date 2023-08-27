@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:steganosaurus/image_picker_and_preview.dart';
 import 'package:steganosaurus/shared/card.dart';
 import 'package:steganosaurus/shared/text_styles.dart';
 
@@ -20,11 +21,13 @@ class Body extends StatelessWidget {
               style: getBaseTextStyle(20),
             ),
           ),
-          Expanded(
-            child: MyCard(
-                child: Text('Choosing a picture',
-                    style: getAccentedTextStyle(null))),
-          )
+          MyCard(
+              child: Column(
+            children: [
+              Text('Choosing a picture', style: getAccentedTextStyle(null)),
+              ImagePickerAndPreview()
+            ],
+          ))
         ]));
   }
 }
