@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:steganosaurus/image_picker_and_preview.dart';
+import 'package:steganosaurus/shared/button_styles.dart';
 import 'package:steganosaurus/shared/card.dart';
 import 'package:steganosaurus/shared/steganography.dart';
 import 'package:steganosaurus/shared/text_styles.dart';
@@ -49,8 +50,9 @@ class _BodyState extends State<Body> {
               ImagePickerAndPreview(setCoverImage: setCoverImage)
             ],
           )),
-          ElevatedButton(
+          FilledButton(
               onPressed: startProcessingImage,
+              style: buttonStyle,
               child: const Text('Generate stego image'))
         ]));
   }

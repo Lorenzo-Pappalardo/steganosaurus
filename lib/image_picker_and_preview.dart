@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:steganosaurus/shared/button_styles.dart';
 
 class ImagePickerAndPreview extends StatefulWidget {
   final Function setCoverImage;
@@ -39,6 +40,7 @@ class _ImagePickerAndPreviewState extends State<ImagePickerAndPreview> {
     List<Widget> toolbarChildren = [
       ElevatedButton(
         onPressed: _openImagePicker,
+        style: buttonStyle,
         child: const Text('Select an image'),
       ),
     ];
@@ -53,6 +55,7 @@ class _ImagePickerAndPreviewState extends State<ImagePickerAndPreview> {
 
       toolbarChildren.add(ElevatedButton(
         onPressed: () {},
+        style: buttonStyle,
         child: const Text('Next'),
       ));
     }
