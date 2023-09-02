@@ -20,13 +20,15 @@ class _BodyState extends State<Body> {
   void setCoverImage(String coverImagePath) {
     setState(() {
       this.coverImagePath = coverImagePath;
-
-      img.decodeImageFile(coverImagePath).then((image) {
-        if (image != null) {
-          processImage(image, "messageToEmbed");
-        }
-      }).catchError((e) {});
     });
+  }
+
+  void startProcessingImage() async {
+    final coverImage = await img.decodeImageFile(coverImagePath!);
+
+    if (coverImage != null) {
+      processImage(coverImage, "messageToEmbed");
+    }
   }
 
   @override
@@ -35,12 +37,9 @@ class _BodyState extends State<Body> {
         padding: EdgeInsets.all(padding),
         child:
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 0, 0, (padding / 2)),
-            child: Text(
-              'Begin by...',
-              style: getBaseTextStyle(20),
-            ),
+          Text(
+            'Begin by...',
+            style: getBaseTextStyle(20),
           ),
           MyCard(
               child: Column(
@@ -49,7 +48,10 @@ class _BodyState extends State<Body> {
               Text('Choosing a picture', style: getAccentedTextStyle(null)),
               ImagePickerAndPreview(setCoverImage: setCoverImage)
             ],
-          ))
+          )),
+          ElevatedButton(
+              onPressed: startProcessingImage,
+              child: const Text('Generate stego image'))
         ]));
   }
 }
