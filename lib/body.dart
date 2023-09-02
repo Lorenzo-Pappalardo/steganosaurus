@@ -1,12 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:steganosaurus/image_picker_and_preview.dart';
 import 'package:steganosaurus/shared/card.dart';
+import 'package:steganosaurus/shared/steganography.dart';
 import 'package:steganosaurus/shared/text_styles.dart';
 
-class Body extends StatelessWidget {
+class Body extends StatefulWidget {
+  const Body({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
   final double padding = 16;
 
-  const Body({super.key});
+  String? coverImagePath;
+
+  void setCoverImage(String coverImagePath) {
+    setState(() {
+      this.coverImagePath = coverImagePath;
+
+      img.decodeImageFile(coverImagePath).then((image) {
+        if (image != null) {
+          processImage(image, "messageToEmbed");
+        }
+      }).catchError((e) {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +44,10 @@ class Body extends StatelessWidget {
           ),
           MyCard(
               child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Choosing a picture', style: getAccentedTextStyle(null)),
-              ImagePickerAndPreview()
+              ImagePickerAndPreview(setCoverImage: setCoverImage)
             ],
           ))
         ]));
