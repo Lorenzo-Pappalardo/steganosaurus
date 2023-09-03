@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -20,7 +20,7 @@ Future<File> get _outputFile async {
   return File('$path/$stegoImageName');
 }
 
-void embedSecretMessage(Image coverImage, String messageToEmbed,
+Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
     {int bitsToBeEmbeddedPerPixel = defaultBitsToBeEmbeddedPerPixel}) async {
   messageToEmbed += endOfEmbeddedMessage;
 
@@ -57,7 +57,11 @@ void embedSecretMessage(Image coverImage, String messageToEmbed,
 
   await (await _outputFile).writeAsBytes(encodedStegoImage, flush: true);
 
-  print("Message embedded successfully");
+  if (kDebugMode) {
+    print("Message embedded successfully");
+  }
+
+  return true;
 }
 
 String extractSecretMessage(Image stegoImage,
@@ -78,6 +82,8 @@ String extractSecretMessage(Image stegoImage,
         byte.substring(byte.length - bitsToBeEmbeddedPerPixel);
 
     if (secretMessageBinary.endsWith(endOfEmbeddedMessageBinary)) {
+      secretMessageBinary = secretMessageBinary.substring(
+          0, secretMessageBinary.length - endOfEmbeddedMessageBinary.length);
       break;
     }
   }
@@ -90,6 +96,9 @@ String extractSecretMessage(Image stegoImage,
 
   String secretMessage = String.fromCharCodes(decodedMessageBytes);
 
-  print('Extracted embedded message: ' + secretMessage);
-  return secretMessageBinary;
+  if (kDebugMode) {
+    print('Extracted embedded message: $secretMessage');
+  }
+
+  return secretMessage;
 }

@@ -24,6 +24,7 @@ class _BodyState extends State<Body> {
   String? coverImagePath;
   String? messageToEmbed;
   String? stegoImagePath;
+  String? embeddedMessage;
 
   img.Image? image;
 
@@ -32,9 +33,10 @@ class _BodyState extends State<Body> {
 
     setState(() {
       if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
-        coverImagePath = coverImagePath;
+        coverImagePath = chosenImage;
       } else {
-        stegoImagePath = coverImagePath;
+        stegoImagePath = chosenImage;
+        embeddedMessage = null;
       }
 
       this.image = image;
@@ -51,7 +53,9 @@ class _BodyState extends State<Body> {
     if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
       embedSecretMessage(image!, messageToEmbed!);
     } else {
-      extractSecretMessage(image!);
+      setState(() {
+        embeddedMessage = extractSecretMessage(image!);
+      });
     }
   }
 
@@ -128,7 +132,10 @@ class _BodyState extends State<Body> {
                           processImage();
                         },
                         style: buttonStyle,
-                        child: const Text('Extract secret message'))
+                        child: const Text('Extract secret message')),
+                    if (embeddedMessage != null)
+                      Text('Extracted secret message: $embeddedMessage',
+                          style: getBaseTextStyle(20)),
                   ]
                 ]))
       ],
