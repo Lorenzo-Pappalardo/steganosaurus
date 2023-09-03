@@ -32,8 +32,10 @@ class _HomeState extends State<Home> {
                   : ModeOfOperationEnum.extract);
             },
             items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.image), label: 'Image')
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.enhanced_encryption), label: 'Embed'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.lock_open), label: 'Extract')
             ]));
   }
 }
