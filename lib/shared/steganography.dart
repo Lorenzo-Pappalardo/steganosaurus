@@ -79,8 +79,6 @@ String extractSecretMessage(Image stegoImage,
 
     if (secretMessageBinary.endsWith(endOfEmbeddedMessageBinary)) {
       break;
-    } else if (secretMessageBinary.length > 200) {
-      break;
     }
   }
 

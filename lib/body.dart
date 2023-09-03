@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:steganosaurus/image_picker_and_preview.dart';
+import 'package:steganosaurus/secret_message_input.dart';
 import 'package:steganosaurus/shared/button_styles.dart';
 import 'package:steganosaurus/shared/card.dart';
 import 'package:steganosaurus/shared/steganography.dart';
@@ -14,31 +15,45 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
+  final int bitsToBeEmbeddedPerPixel = 2;
   final double padding = 16;
 
   String? coverImagePath;
+  String? messageToEmbed;
   String? stegoImagePath;
 
-  void setCoverImage(String coverImagePath) {
+  img.Image? image;
+
+  void setCoverImage(String coverImagePath) async {
+    final img.Image? image = await img.decodeImageFile(coverImagePath);
+
     setState(() {
       this.coverImagePath = coverImagePath;
+      this.image = image;
     });
   }
 
-  void setStegoImage(String stegoImage) {
+  void setMessageToEmbed(String messageToEmbed) {
     setState(() {
-      this.stegoImagePath = stegoImage;
+      this.messageToEmbed = messageToEmbed;
+    });
+  }
+
+  void setStegoImage(String stegoImagePath) async {
+    final img.Image? image = await img.decodeImageFile(stegoImagePath);
+
+    setState(() {
+      this.stegoImagePath = stegoImagePath;
+      this.image = image;
     });
   }
 
   void startProcessingImage(String imagePath, bool isEncoding) async {
-    final chosenImage = await img.decodeImageFile(imagePath);
-
-    if (chosenImage != null) {
-      if (isEncoding) {
-        processImage(chosenImage, "messageToEmbed");
+    if (image != null) {
+      if (isEncoding && messageToEmbed != null) {
+        processImage(image!, messageToEmbed!);
       } else {
-        extractSecretMessage(chosenImage);
+        extractSecretMessage(image!);
       }
     }
   }
@@ -65,10 +80,21 @@ class _BodyState extends State<Body> {
                       ImagePickerAndPreview(setImage: setCoverImage)
                     ],
                   )),
+                  SecretMessageInput(
+                      maxCharacters: image == null
+                          ? 0
+                          : image!.width *
+                              image!.height *
+                              bitsToBeEmbeddedPerPixel,
+                      setMessageToEmbed: setMessageToEmbed),
                   FilledButton(
-                      onPressed: () {
-                        startProcessingImage(coverImagePath!, true);
-                      },
+                      onPressed: image == null ||
+                              messageToEmbed == null ||
+                              messageToEmbed!.isEmpty
+                          ? null
+                          : () {
+                              startProcessingImage(coverImagePath!, true);
+                            },
                       style: buttonStyle,
                       child: const Text('Generate stego image')),
                   MyCard(
