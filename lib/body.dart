@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+import 'package:steganosaurus/home.dart';
 import 'package:steganosaurus/image_picker_and_preview.dart';
 import 'package:steganosaurus/secret_message_input.dart';
 import 'package:steganosaurus/shared/button_styles.dart';
@@ -8,7 +9,9 @@ import 'package:steganosaurus/shared/steganography.dart';
 import 'package:steganosaurus/shared/text_styles.dart';
 
 class Body extends StatefulWidget {
-  const Body({super.key});
+  final ModeOfOperationEnum modeOfOperation;
+
+  const Body({super.key, required this.modeOfOperation});
 
   @override
   State<StatefulWidget> createState() => _BodyState();
@@ -24,11 +27,16 @@ class _BodyState extends State<Body> {
 
   img.Image? image;
 
-  void setCoverImage(String coverImagePath) async {
-    final img.Image? image = await img.decodeImageFile(coverImagePath);
+  void setImage(String chosenImage) async {
+    final img.Image? image = await img.decodeImageFile(chosenImage);
 
     setState(() {
-      this.coverImagePath = coverImagePath;
+      if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
+        coverImagePath = coverImagePath;
+      } else {
+        stegoImagePath = coverImagePath;
+      }
+
       this.image = image;
     });
   }
@@ -39,22 +47,11 @@ class _BodyState extends State<Body> {
     });
   }
 
-  void setStegoImage(String stegoImagePath) async {
-    final img.Image? image = await img.decodeImageFile(stegoImagePath);
-
-    setState(() {
-      this.stegoImagePath = stegoImagePath;
-      this.image = image;
-    });
-  }
-
-  void startProcessingImage(String imagePath, bool isEncoding) async {
-    if (image != null) {
-      if (isEncoding && messageToEmbed != null) {
-        processImage(image!, messageToEmbed!);
-      } else {
-        extractSecretMessage(image!);
-      }
+  void startProcessingImage() async {
+    if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
+      processImage(image!, messageToEmbed!);
+    } else {
+      extractSecretMessage(image!);
     }
   }
 
@@ -71,48 +68,67 @@ class _BodyState extends State<Body> {
                     'Begin by...',
                     style: getBaseTextStyle(20),
                   ),
-                  MyCard(
+                  if (widget.modeOfOperation ==
+                      ModeOfOperationEnum.generate) ...[
+                    MyCard(
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Choosing a picture',
+                            style: getAccentedTextStyle(null)),
+                        ImagePickerAndPreview(setImage: setImage)
+                      ],
+                    )),
+                    Text(
+                      'Then...',
+                      style: getBaseTextStyle(20),
+                    ),
+                    MyCard(
                       child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Choosing a picture',
-                          style: getAccentedTextStyle(null)),
-                      ImagePickerAndPreview(setImage: setCoverImage)
-                    ],
-                  )),
-                  SecretMessageInput(
-                      maxCharacters: image == null
-                          ? 0
-                          : image!.width *
-                              image!.height *
-                              bitsToBeEmbeddedPerPixel,
-                      setMessageToEmbed: setMessageToEmbed),
-                  FilledButton(
-                      onPressed: image == null ||
-                              messageToEmbed == null ||
-                              messageToEmbed!.isEmpty
-                          ? null
-                          : () {
-                              startProcessingImage(coverImagePath!, true);
-                            },
-                      style: buttonStyle,
-                      child: const Text('Generate stego image')),
-                  MyCard(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Choosing a picture',
-                          style: getAccentedTextStyle(null)),
-                      ImagePickerAndPreview(setImage: setStegoImage)
-                    ],
-                  )),
-                  FilledButton(
-                      onPressed: () {
-                        startProcessingImage(stegoImagePath!, false);
-                      },
-                      style: buttonStyle,
-                      child: const Text('Extract secret message'))
-                ])),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Write a secret message',
+                              style: getAccentedTextStyle(null)),
+                          SecretMessageInput(
+                              maxCharacters: image == null
+                                  ? 0
+                                  : image!.width *
+                                      image!.height *
+                                      bitsToBeEmbeddedPerPixel,
+                              setMessageToEmbed: setMessageToEmbed),
+                        ],
+                      ),
+                    ),
+                    FilledButton(
+                        onPressed: image == null ||
+                                messageToEmbed == null ||
+                                messageToEmbed!.isEmpty
+                            ? null
+                            : () {
+                                startProcessingImage();
+                              },
+                        style: buttonStyle,
+                        child: const Text('Generate stego image'))
+                  ],
+                  if (widget.modeOfOperation ==
+                      ModeOfOperationEnum.extract) ...[
+                    MyCard(
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Choosing a picture',
+                            style: getAccentedTextStyle(null)),
+                        ImagePickerAndPreview(setImage: setImage)
+                      ],
+                    )),
+                    FilledButton(
+                        onPressed: () {
+                          startProcessingImage();
+                        },
+                        style: buttonStyle,
+                        child: const Text('Extract secret message'))
+                  ]
+                ]))
       ],
     );
   }

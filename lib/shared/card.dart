@@ -30,7 +30,8 @@ class MyCard extends StatelessWidget {
               BoxShadow(
                   color: Theme.of(context).primaryColor,
                   offset: boxShadowOffset,
-                  blurStyle: BlurStyle.solid)
+                  blurStyle: BlurStyle.normal,
+                  blurRadius: 2)
             ],
             border: Border.all(color: Theme.of(context).primaryColor)),
         child: child,

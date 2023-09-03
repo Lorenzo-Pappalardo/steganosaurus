@@ -53,17 +53,18 @@ class _ImagePickerAndPreviewState extends State<ImagePickerAndPreview> {
         child: Image.file(File(imagePath!)),
       ));
 
-      toolbarChildren.add(ElevatedButton(
+      /* toolbarChildren.add(ElevatedButton(
         onPressed: () {},
         style: buttonStyle,
         child: const Text('Next'),
-      ));
+      )); */
     }
 
     children.add(Row(
-      mainAxisAlignment: imageChosen
+      mainAxisAlignment: /* imageChosen
           ? MainAxisAlignment.spaceBetween
-          : MainAxisAlignment.center,
+          : MainAxisAlignment.center, */
+          MainAxisAlignment.center,
       children: toolbarChildren,
     ));
 
