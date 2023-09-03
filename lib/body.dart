@@ -47,9 +47,9 @@ class _BodyState extends State<Body> {
     });
   }
 
-  void startProcessingImage() async {
+  void processImage() async {
     if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
-      processImage(image!, messageToEmbed!);
+      embedSecretMessage(image!, messageToEmbed!);
     } else {
       extractSecretMessage(image!);
     }
@@ -105,7 +105,7 @@ class _BodyState extends State<Body> {
                                 messageToEmbed!.isEmpty
                             ? null
                             : () {
-                                startProcessingImage();
+                                processImage();
                               },
                         style: buttonStyle,
                         child: const Text('Generate stego image'))
@@ -123,7 +123,7 @@ class _BodyState extends State<Body> {
                     )),
                     FilledButton(
                         onPressed: () {
-                          startProcessingImage();
+                          processImage();
                         },
                         style: buttonStyle,
                         child: const Text('Extract secret message'))

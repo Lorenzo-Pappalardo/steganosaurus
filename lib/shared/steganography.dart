@@ -20,7 +20,7 @@ Future<File> get _outputFile async {
   return File('$path/$stegoImageName');
 }
 
-void processImage(Image coverImage, String messageToEmbed,
+void embedSecretMessage(Image coverImage, String messageToEmbed,
     {int bitsToBeEmbeddedPerPixel = defaultBitsToBeEmbeddedPerPixel}) async {
   messageToEmbed += endOfEmbeddedMessage;
 
