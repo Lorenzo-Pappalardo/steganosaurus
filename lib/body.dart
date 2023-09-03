@@ -17,6 +17,7 @@ class _BodyState extends State<Body> {
   final double padding = 16;
 
   String? coverImagePath;
+  String? stegoImagePath;
 
   void setCoverImage(String coverImagePath) {
     setState(() {
@@ -24,36 +25,69 @@ class _BodyState extends State<Body> {
     });
   }
 
-  void startProcessingImage() async {
-    final coverImage = await img.decodeImageFile(coverImagePath!);
+  void setStegoImage(String stegoImage) {
+    setState(() {
+      this.stegoImagePath = stegoImage;
+    });
+  }
 
-    if (coverImage != null) {
-      processImage(coverImage, "messageToEmbed");
+  void startProcessingImage(String imagePath, bool isEncoding) async {
+    final chosenImage = await img.decodeImageFile(imagePath);
+
+    if (chosenImage != null) {
+      if (isEncoding) {
+        processImage(chosenImage, "messageToEmbed");
+      } else {
+        extractSecretMessage(chosenImage);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.all(padding),
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(
-            'Begin by...',
-            style: getBaseTextStyle(20),
-          ),
-          MyCard(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Choosing a picture', style: getAccentedTextStyle(null)),
-              ImagePickerAndPreview(setCoverImage: setCoverImage)
-            ],
-          )),
-          FilledButton(
-              onPressed: startProcessingImage,
-              style: buttonStyle,
-              child: const Text('Generate stego image'))
-        ]));
+    return ListView(
+      children: [
+        Padding(
+            padding: EdgeInsets.all(padding),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Begin by...',
+                    style: getBaseTextStyle(20),
+                  ),
+                  MyCard(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Choosing a picture',
+                          style: getAccentedTextStyle(null)),
+                      ImagePickerAndPreview(setImage: setCoverImage)
+                    ],
+                  )),
+                  FilledButton(
+                      onPressed: () {
+                        startProcessingImage(coverImagePath!, true);
+                      },
+                      style: buttonStyle,
+                      child: const Text('Generate stego image')),
+                  MyCard(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Choosing a picture',
+                          style: getAccentedTextStyle(null)),
+                      ImagePickerAndPreview(setImage: setStegoImage)
+                    ],
+                  )),
+                  FilledButton(
+                      onPressed: () {
+                        startProcessingImage(stegoImagePath!, false);
+                      },
+                      style: buttonStyle,
+                      child: const Text('Extract secret message'))
+                ])),
+      ],
+    );
   }
 }

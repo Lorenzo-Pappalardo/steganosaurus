@@ -5,9 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:steganosaurus/shared/button_styles.dart';
 
 class ImagePickerAndPreview extends StatefulWidget {
-  final Function setCoverImage;
+  final Function setImage;
 
-  const ImagePickerAndPreview({super.key, required this.setCoverImage});
+  const ImagePickerAndPreview({super.key, required this.setImage});
 
   @override
   State<StatefulWidget> createState() => _ImagePickerAndPreviewState();
@@ -22,7 +22,7 @@ class _ImagePickerAndPreviewState extends State<ImagePickerAndPreview> {
     imagePath = pickedImagePath;
 
     setState(() {
-      widget.setCoverImage(imagePath);
+      widget.setImage(imagePath);
     });
   }
 
