@@ -76,7 +76,8 @@ class _BodyState extends State<Body> {
                       children: [
                         Text('Choosing a picture',
                             style: getAccentedTextStyle(null)),
-                        ImagePickerAndPreview(setImage: setImage)
+                        ImagePickerAndPreview(
+                            key: const Key("generation"), setImage: setImage)
                       ],
                     )),
                     Text(
@@ -118,7 +119,8 @@ class _BodyState extends State<Body> {
                       children: [
                         Text('Choosing a picture',
                             style: getAccentedTextStyle(null)),
-                        ImagePickerAndPreview(setImage: setImage)
+                        ImagePickerAndPreview(
+                            key: const Key("extraction"), setImage: setImage)
                       ],
                     )),
                     FilledButton(
