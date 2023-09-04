@@ -3,15 +3,25 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 const String stegoImageName = "stegoImage.bmp";
 const String endOfEmbeddedMessage = "[*LP*]";
 const int defaultBitsToBeEmbeddedPerPixel = 2;
 
 Future<String?> get _outputPath async {
-  final Directory? directory = Platform.isAndroid
-      ? await getExternalStorageDirectory()
-      : await getDownloadsDirectory();
+  Directory? directory;
+
+  if (Platform.isAndroid) {
+    directory = Directory("/storage/emulated/0/Download");
+
+    if (!directory.existsSync()) {
+      directory = Directory("/storage/emulated/0/Downloads");
+    }
+  } else {
+    directory = await getDownloadsDirectory();
+  }
+
   return directory?.path;
 }
 
@@ -55,13 +65,21 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
       height: coverImage.height,
       bytes: stegoImage.buffer));
 
-  await (await _outputFile).writeAsBytes(encodedStegoImage, flush: true);
+  if (await Permission.storage.request().isGranted) {
+    // Either the permission was already granted before or the user just granted it.
+    await (await _outputFile).writeAsBytes(encodedStegoImage, flush: true);
 
-  if (kDebugMode) {
-    print("Message embedded successfully");
+    if (kDebugMode) {
+      print("Message embedded successfully");
+    }
+
+    return true;
   }
 
-  return true;
+  if (kDebugMode) {
+    print("Message could not be embedded as the permission was denied");
+  }
+  return false;
 }
 
 String extractSecretMessage(Image stegoImage,
