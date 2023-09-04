@@ -65,7 +65,7 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
       height: coverImage.height,
       bytes: stegoImage.buffer));
 
-  if (await Permission.storage.request().isGranted) {
+  if (await Permission.manageExternalStorage.request().isGranted) {
     // Either the permission was already granted before or the user just granted it.
     await (await _outputFile).writeAsBytes(encodedStegoImage, flush: true);
 
