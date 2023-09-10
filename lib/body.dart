@@ -28,6 +28,12 @@ class _BodyState extends State<Body> {
 
   img.Image? _image;
 
+  @override
+  void didUpdateWidget(covariant Body oldWidget) {
+    embeddedMessage = null;
+    super.didUpdateWidget(oldWidget);
+  }
+
   void _setImagePaths(String chosenImage) {
     setState(() {
       if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
