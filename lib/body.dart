@@ -143,8 +143,19 @@ class _BodyState extends State<Body> {
                         style: buttonStyle,
                         child: const Text('Extract secret message')),
                     if (embeddedMessage != null)
-                      Text('Extracted secret message: $embeddedMessage',
-                          style: getBaseTextStyle(20)),
+                      MyCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Extracted secret message:',
+                                style: getAccentedTextStyle(null)),
+                            Text(
+                              embeddedMessage!,
+                              style: getBaseTextStyle(20),
+                            )
+                          ],
+                        ),
+                      ),
                   ]
                 ]))
       ],
