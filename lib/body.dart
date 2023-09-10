@@ -58,12 +58,14 @@ class _BodyState extends State<Body> {
   }
 
   void _embedSecretMessage() {
-    embedSecretMessage(_image!, messageToEmbed!);
+    embedSecretMessage(
+        _image!, messageToEmbed!, widget.bitsToBeEmbeddedPerPixel);
   }
 
   void _extractSecretMessage() {
     setState(() {
-      embeddedMessage = extractSecretMessage(_image!);
+      embeddedMessage =
+          extractSecretMessage(_image!, widget.bitsToBeEmbeddedPerPixel);
     });
   }
 

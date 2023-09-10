@@ -7,7 +7,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 const String stegoImageName = "stegoImage.bmp";
 const String endOfEmbeddedMessage = "[*LP*]";
-const int defaultBitsToBeEmbeddedPerPixel = 2;
 
 Future<String?> get _outputPath async {
   Directory? directory;
@@ -31,7 +30,7 @@ Future<File> get _outputFile async {
 }
 
 Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
-    {int bitsToBeEmbeddedPerPixel = defaultBitsToBeEmbeddedPerPixel}) async {
+    int bitsToBeEmbeddedPerPixel) async {
   messageToEmbed += endOfEmbeddedMessage;
 
   final String messageToEmbedBinary = messageToEmbed.codeUnits
@@ -82,8 +81,7 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
   return false;
 }
 
-String extractSecretMessage(Image stegoImage,
-    {int bitsToBeEmbeddedPerPixel = defaultBitsToBeEmbeddedPerPixel}) {
+String extractSecretMessage(Image stegoImage, int bitsToBeEmbeddedPerPixel) {
   final List<String> stegoImageBytes = stegoImage
       .toUint8List()
       .map((e) => e.toRadixString(2).padLeft(8, '0'))
