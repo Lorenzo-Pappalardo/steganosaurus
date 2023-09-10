@@ -10,6 +10,7 @@ import 'package:steganosaurus/shared/text_styles.dart';
 
 class Body extends StatefulWidget {
   final ModeOfOperationEnum modeOfOperation;
+  final int bitsToBeEmbeddedPerPixel = 2;
 
   const Body({super.key, required this.modeOfOperation});
 
@@ -18,45 +19,52 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  final int bitsToBeEmbeddedPerPixel = 2;
-  final double padding = 16;
+  static const double _padding = 16;
 
   String? coverImagePath;
   String? messageToEmbed;
   String? stegoImagePath;
   String? embeddedMessage;
 
-  img.Image? image;
+  img.Image? _image;
 
-  void setImage(String chosenImage) async {
-    final img.Image? image = await img.decodeImageFile(chosenImage);
-
+  void _setImagePaths(String chosenImage) {
     setState(() {
       if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
         coverImagePath = chosenImage;
       } else {
         stegoImagePath = chosenImage;
-        embeddedMessage = null;
       }
-
-      this.image = image;
     });
   }
 
-  void setMessageToEmbed(String messageToEmbed) {
+  void _setImage(String chosenImage) async {
+    final img.Image? image = await img.decodeImageFile(chosenImage);
+
+    setState(() {
+      _image = image;
+    });
+  }
+
+  void _onImagePicked(String chosenImage) {
+    _setImagePaths(chosenImage);
+    _setImage(chosenImage);
+  }
+
+  void _setMessageToEmbed(String messageToEmbed) {
     setState(() {
       this.messageToEmbed = messageToEmbed;
     });
   }
 
-  void processImage() async {
-    if (widget.modeOfOperation == ModeOfOperationEnum.generate) {
-      embedSecretMessage(image!, messageToEmbed!);
-    } else {
-      setState(() {
-        embeddedMessage = extractSecretMessage(image!);
-      });
-    }
+  void _embedSecretMessage() {
+    embedSecretMessage(_image!, messageToEmbed!);
+  }
+
+  void _extractSecretMessage() {
+    setState(() {
+      embeddedMessage = extractSecretMessage(_image!);
+    });
   }
 
   @override
@@ -64,7 +72,7 @@ class _BodyState extends State<Body> {
     return ListView(
       children: [
         Padding(
-            padding: EdgeInsets.all(padding),
+            padding: const EdgeInsets.all(_padding),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -81,7 +89,8 @@ class _BodyState extends State<Body> {
                         Text('Choosing a picture',
                             style: getAccentedTextStyle(null)),
                         ImagePickerAndPreview(
-                            key: const Key("generation"), setImage: setImage)
+                            key: const Key("generation"),
+                            setImage: _onImagePicked)
                       ],
                     )),
                     Text(
@@ -95,22 +104,22 @@ class _BodyState extends State<Body> {
                           Text('Write a secret message',
                               style: getAccentedTextStyle(null)),
                           SecretMessageInput(
-                              maxCharacters: image == null
+                              maxCharacters: _image == null
                                   ? 0
-                                  : image!.width *
-                                      image!.height *
-                                      bitsToBeEmbeddedPerPixel,
-                              setMessageToEmbed: setMessageToEmbed),
+                                  : _image!.width *
+                                      _image!.height *
+                                      widget.bitsToBeEmbeddedPerPixel,
+                              setMessageToEmbed: _setMessageToEmbed),
                         ],
                       ),
                     ),
                     FilledButton(
-                        onPressed: image == null ||
+                        onPressed: _image == null ||
                                 messageToEmbed == null ||
                                 messageToEmbed!.isEmpty
                             ? null
                             : () {
-                                processImage();
+                                _embedSecretMessage();
                               },
                         style: buttonStyle,
                         child: const Text('Generate stego image'))
@@ -124,12 +133,12 @@ class _BodyState extends State<Body> {
                         Text('Choosing a picture',
                             style: getAccentedTextStyle(null)),
                         ImagePickerAndPreview(
-                            key: const Key("extraction"), setImage: setImage)
+                            key: const Key("extraction"), setImage: _setImage)
                       ],
                     )),
                     FilledButton(
                         onPressed: () {
-                          processImage();
+                          _extractSecretMessage();
                         },
                         style: buttonStyle,
                         child: const Text('Extract secret message')),

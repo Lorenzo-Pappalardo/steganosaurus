@@ -11,26 +11,30 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  ModeOfOperationEnum modeOfOperation = ModeOfOperationEnum.generate;
+  ModeOfOperationEnum _modeOfOperation = ModeOfOperationEnum.generate;
 
   void setModeOfOperation(ModeOfOperationEnum newModeOfOperationEnum) {
     setState(() {
-      modeOfOperation = newModeOfOperationEnum;
+      _modeOfOperation = newModeOfOperationEnum;
     });
+  }
+
+  int get navigationBarActiveIndex =>
+      _modeOfOperation == ModeOfOperationEnum.generate ? 0 : 1;
+
+  void setNewModeOfOperation(int tappedIndex) {
+    setModeOfOperation(tappedIndex == 0
+        ? ModeOfOperationEnum.generate
+        : ModeOfOperationEnum.extract);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Body(modeOfOperation: modeOfOperation),
+        body: Body(modeOfOperation: _modeOfOperation),
         bottomNavigationBar: BottomNavigationBar(
-            currentIndex:
-                modeOfOperation == ModeOfOperationEnum.generate ? 0 : 1,
-            onTap: (int tappedNavigationItem) {
-              setModeOfOperation(tappedNavigationItem == 0
-                  ? ModeOfOperationEnum.generate
-                  : ModeOfOperationEnum.extract);
-            },
+            currentIndex: navigationBarActiveIndex,
+            onTap: setNewModeOfOperation,
             items: const [
               BottomNavigationBarItem(
                   icon: Icon(Icons.enhanced_encryption), label: 'Embed'),
