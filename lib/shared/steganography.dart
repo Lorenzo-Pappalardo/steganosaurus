@@ -5,8 +5,8 @@ import 'package:image/image.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-const String stegoImageName = "stegoImage.bmp";
-const String endOfEmbeddedMessage = "[*LP*]";
+const String _stegoImageName = "stegoImage.bmp";
+const String _endOfEmbeddedMessage = "[*LP*]";
 
 Future<String?> get _outputPath async {
   Directory? directory;
@@ -26,20 +26,24 @@ Future<String?> get _outputPath async {
 
 Future<File> get _outputFile async {
   final path = await _outputPath;
-  return File('$path/$stegoImageName');
+  return File('$path/$_stegoImageName');
+}
+
+String _padLeftWithZeroesUntilEightBitsLong(String originalBits) {
+  return originalBits.padLeft(8, '0');
 }
 
 Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
     int bitsToBeEmbeddedPerPixel) async {
-  messageToEmbed += endOfEmbeddedMessage;
+  messageToEmbed += _endOfEmbeddedMessage;
 
   final String messageToEmbedBinary = messageToEmbed.codeUnits
-      .map((x) => x.toRadixString(2).padLeft(8, '0'))
+      .map((x) => _padLeftWithZeroesUntilEightBitsLong(x.toRadixString(2)))
       .join();
 
   final List<String> coverImageBytes = coverImage
       .toUint8List()
-      .map((e) => e.toRadixString(2).padLeft(8, '0'))
+      .map((x) => _padLeftWithZeroesUntilEightBitsLong(x.toRadixString(2)))
       .toList();
 
   int coverImageNextByteToModify = 0;
@@ -50,7 +54,7 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
         messageToEmbedBinary.substring(i, i + bitsToBeEmbeddedPerPixel);
     final String original = coverImageBytes[coverImageNextByteToModify];
     final String modified =
-        original.substring(original.length - bitsToBeEmbeddedPerPixel) +
+        original.substring(0, original.length - bitsToBeEmbeddedPerPixel) +
             bitsToEmbed;
     coverImageBytes[coverImageNextByteToModify] = modified;
     coverImageNextByteToModify++;
@@ -64,7 +68,8 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
       height: coverImage.height,
       bytes: stegoImage.buffer));
 
-  if (await Permission.manageExternalStorage.request().isGranted) {
+  if (await Permission.manageExternalStorage.request().isGranted ||
+      await Permission.storage.request().isGranted) {
     // Either the permission was already granted before or the user just granted it.
     await (await _outputFile).writeAsBytes(encodedStegoImage, flush: true);
 
@@ -78,17 +83,18 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
   if (kDebugMode) {
     print("Message could not be embedded as the permission was denied");
   }
+
   return false;
 }
 
 String extractSecretMessage(Image stegoImage, int bitsToBeEmbeddedPerPixel) {
   final List<String> stegoImageBytes = stegoImage
       .toUint8List()
-      .map((e) => e.toRadixString(2).padLeft(8, '0'))
+      .map((x) => _padLeftWithZeroesUntilEightBitsLong(x.toRadixString(2)))
       .toList();
 
-  final String endOfEmbeddedMessageBinary = endOfEmbeddedMessage.codeUnits
-      .map((x) => x.toRadixString(2).padLeft(8, '0'))
+  final String endOfEmbeddedMessageBinary = _endOfEmbeddedMessage.codeUnits
+      .map((x) => _padLeftWithZeroesUntilEightBitsLong(x.toRadixString(2)))
       .join();
 
   String secretMessageBinary = "";
