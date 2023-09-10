@@ -1,8 +1,16 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:steganosaurus/home.dart';
 import 'package:steganosaurus/shared/theme.dart';
 
 void main() {
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    if (kReleaseMode) exit(1);
+  };
+
   runApp(const MyApp());
 }
 
