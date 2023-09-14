@@ -68,10 +68,11 @@ class _BodyState extends State<Body> {
         _image!, messageToEmbed!, widget.bitsToBeEmbeddedPerPixel);
   }
 
-  void _extractSecretMessage() {
+  void _extractSecretMessage() async {
+    final extractionResult =
+        await extractSecretMessage(_image!, widget.bitsToBeEmbeddedPerPixel);
     setState(() {
-      embeddedMessage =
-          extractSecretMessage(_image!, widget.bitsToBeEmbeddedPerPixel);
+      embeddedMessage = extractionResult;
     });
   }
 

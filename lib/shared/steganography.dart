@@ -33,9 +33,14 @@ String _padLeftWithZeroesUntilEightBitsLong(String originalBits) {
   return originalBits.padLeft(8, '0');
 }
 
-Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
-    int bitsToBeEmbeddedPerPixel) async {
-  messageToEmbed += _endOfEmbeddedMessage;
+Future<bool> embedSecretMessageIsolated(
+    EmbedSecretMessageIsolatedParameters
+        embedSecretMessageIsolatedParameters) async {
+  final coverImage = embedSecretMessageIsolatedParameters.coverImage;
+  final messageToEmbed = embedSecretMessageIsolatedParameters.messageToEmbed +=
+      _endOfEmbeddedMessage;
+  final bitsToBeEmbeddedPerPixel =
+      embedSecretMessageIsolatedParameters.bitsToBeEmbeddedPerPixel;
 
   final String messageToEmbedBinary = messageToEmbed.codeUnits
       .map((x) => _padLeftWithZeroesUntilEightBitsLong(x.toRadixString(2)))
@@ -68,16 +73,25 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
       height: coverImage.height,
       bytes: stegoImage.buffer));
 
+  await (await _outputFile).writeAsBytes(encodedStegoImage, flush: true);
+
+  if (kDebugMode) {
+    print("Message embedded successfully");
+  }
+
+  return true;
+}
+
+Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
+    int bitsToBeEmbeddedPerPixel) async {
   if (await Permission.manageExternalStorage.request().isGranted ||
       await Permission.storage.request().isGranted) {
     // Either the permission was already granted before or the user just granted it.
-    await (await _outputFile).writeAsBytes(encodedStegoImage, flush: true);
 
-    if (kDebugMode) {
-      print("Message embedded successfully");
-    }
-
-    return true;
+    return compute(
+        embedSecretMessageIsolated,
+        EmbedSecretMessageIsolatedParameters(
+            coverImage, messageToEmbed, bitsToBeEmbeddedPerPixel));
   }
 
   if (kDebugMode) {
@@ -87,7 +101,13 @@ Future<bool> embedSecretMessage(Image coverImage, String messageToEmbed,
   return false;
 }
 
-String extractSecretMessage(Image stegoImage, int bitsToBeEmbeddedPerPixel) {
+String extractSecretMessageIsolated(
+    ExtractSecretMessageIsolatedParameters
+        extractSecretMessageIsolatedParameters) {
+  final stegoImage = extractSecretMessageIsolatedParameters.stegoImage;
+  final bitsToBeEmbeddedPerPixel =
+      extractSecretMessageIsolatedParameters.bitsToBeEmbeddedPerPixel;
+
   final List<String> stegoImageBytes = stegoImage
       .toUint8List()
       .map((x) => _padLeftWithZeroesUntilEightBitsLong(x.toRadixString(2)))
@@ -123,4 +143,29 @@ String extractSecretMessage(Image stegoImage, int bitsToBeEmbeddedPerPixel) {
   }
 
   return secretMessage;
+}
+
+Future<String> extractSecretMessage(
+    Image stegoImage, int bitsToBeEmbeddedPerPixel) async {
+  return compute<ExtractSecretMessageIsolatedParameters, String>(
+      extractSecretMessageIsolated,
+      ExtractSecretMessageIsolatedParameters(
+          stegoImage, bitsToBeEmbeddedPerPixel));
+}
+
+class EmbedSecretMessageIsolatedParameters {
+  Image coverImage;
+  String messageToEmbed;
+  int bitsToBeEmbeddedPerPixel;
+
+  EmbedSecretMessageIsolatedParameters(
+      this.coverImage, this.messageToEmbed, this.bitsToBeEmbeddedPerPixel);
+}
+
+class ExtractSecretMessageIsolatedParameters {
+  Image stegoImage;
+  int bitsToBeEmbeddedPerPixel;
+
+  ExtractSecretMessageIsolatedParameters(
+      this.stegoImage, this.bitsToBeEmbeddedPerPixel);
 }
