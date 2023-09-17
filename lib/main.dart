@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:steganosaurus/home.dart';
 import 'package:steganosaurus/shared/theme.dart';
 
@@ -22,10 +23,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Steganosaurus',
-      themeMode: ThemeMode.system,
-      theme: theme,
-      home: const SafeArea(child: Home()),
-      color: accentColor,
+      themeMode: getThemeMode(context),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      home: ProgressHUD(child: const SafeArea(child: Home())),
     );
   }
 }

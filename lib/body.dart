@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:image/image.dart' as img;
 import 'package:steganosaurus/home.dart';
 import 'package:steganosaurus/image_picker_and_preview.dart';
@@ -30,6 +31,7 @@ class _BodyState extends State<Body> {
 
   @override
   void didUpdateWidget(covariant Body oldWidget) {
+    _image = null;
     embeddedMessage = null;
     super.didUpdateWidget(oldWidget);
   }
@@ -63,14 +65,26 @@ class _BodyState extends State<Body> {
     });
   }
 
-  void _embedSecretMessage() {
+  void _embedSecretMessage(BuildContext context) {
+    final progress = ProgressHUD.of(context);
+    progress?.show();
+
     embedSecretMessage(
-        _image!, messageToEmbed!, widget.bitsToBeEmbeddedPerPixel);
+            _image!, messageToEmbed!, widget.bitsToBeEmbeddedPerPixel)
+        .then((succeeded) {
+      progress?.dismiss();
+    });
   }
 
-  void _extractSecretMessage() async {
+  void _extractSecretMessage(BuildContext context) async {
+    final progress = ProgressHUD.of(context);
+    progress?.show();
+
     final extractionResult =
         await extractSecretMessage(_image!, widget.bitsToBeEmbeddedPerPixel);
+
+    progress?.dismiss();
+
     setState(() {
       embeddedMessage = extractionResult;
     });
@@ -87,7 +101,7 @@ class _BodyState extends State<Body> {
                 children: [
                   Text(
                     'Begin by...',
-                    style: getBaseTextStyle(20),
+                    style: getBaseTextStyle(context, 20),
                   ),
                   if (widget.modeOfOperation ==
                       ModeOfOperationEnum.generate) ...[
@@ -96,42 +110,44 @@ class _BodyState extends State<Body> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Choosing a picture',
-                            style: getAccentedTextStyle(null)),
+                            style: getBaseTextStyle(context, null)),
                         ImagePickerAndPreview(
                             key: const Key("generation"),
                             setImage: _onImagePicked)
                       ],
                     )),
-                    Text(
-                      'Then...',
-                      style: getBaseTextStyle(20),
-                    ),
-                    MyCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Write a secret message',
-                              style: getAccentedTextStyle(null)),
-                          SecretMessageInput(
-                              maxCharacters: _image == null
-                                  ? 0
-                                  : _image!.width *
-                                      _image!.height *
-                                      widget.bitsToBeEmbeddedPerPixel,
-                              setMessageToEmbed: _setMessageToEmbed),
-                        ],
+                    if (_image != null) ...[
+                      Text(
+                        'Then...',
+                        style: getBaseTextStyle(context, 20),
                       ),
-                    ),
-                    FilledButton(
-                        onPressed: _image == null ||
-                                messageToEmbed == null ||
-                                messageToEmbed!.isEmpty
-                            ? null
-                            : () {
-                                _embedSecretMessage();
-                              },
-                        style: buttonStyle,
-                        child: const Text('Generate stego image'))
+                      MyCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Write a secret message',
+                                style: getBaseTextStyle(context, null)),
+                            SecretMessageInput(
+                                maxCharacters: _image == null
+                                    ? 0
+                                    : _image!.width *
+                                        _image!.height *
+                                        widget.bitsToBeEmbeddedPerPixel,
+                                setMessageToEmbed: _setMessageToEmbed),
+                          ],
+                        ),
+                      ),
+                      FilledButton(
+                          onPressed: _image == null ||
+                                  messageToEmbed == null ||
+                                  messageToEmbed!.isEmpty
+                              ? null
+                              : () {
+                                  _embedSecretMessage(context);
+                                },
+                          style: buttonStyle,
+                          child: const Text('Generate stego image'))
+                    ]
                   ],
                   if (widget.modeOfOperation ==
                       ModeOfOperationEnum.extract) ...[
@@ -140,27 +156,28 @@ class _BodyState extends State<Body> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Choosing a picture',
-                            style: getAccentedTextStyle(null)),
+                            style: getBaseTextStyle(context, null)),
                         ImagePickerAndPreview(
                             key: const Key("extraction"), setImage: _setImage)
                       ],
                     )),
-                    FilledButton(
-                        onPressed: () {
-                          _extractSecretMessage();
-                        },
-                        style: buttonStyle,
-                        child: const Text('Extract secret message')),
+                    if (_image != null)
+                      FilledButton(
+                          onPressed: () {
+                            _extractSecretMessage(context);
+                          },
+                          style: buttonStyle,
+                          child: const Text('Extract secret message')),
                     if (embeddedMessage != null)
                       MyCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Extracted secret message:',
-                                style: getAccentedTextStyle(null)),
+                                style: getBaseTextStyle(context, null)),
                             Text(
                               embeddedMessage!,
-                              style: getBaseTextStyle(20),
+                              style: getBaseTextStyle(context, 20),
                             )
                           ],
                         ),

@@ -13,10 +13,6 @@ class MyCard extends StatelessWidget {
 
   MyCard({super.key, required this.child});
 
-  BorderSide getBorder(Color color) {
-    return BorderSide(color: color);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -29,9 +25,7 @@ class MyCard extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                   color: Theme.of(context).primaryColor,
-                  offset: boxShadowOffset,
-                  blurStyle: BlurStyle.normal,
-                  blurRadius: 2)
+                  offset: boxShadowOffset)
             ],
             border: Border.all(color: Theme.of(context).primaryColor)),
         child: child,
