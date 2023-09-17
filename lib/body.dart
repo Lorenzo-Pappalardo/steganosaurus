@@ -6,6 +6,7 @@ import 'package:steganosaurus/image_picker_and_preview.dart';
 import 'package:steganosaurus/secret_message_input.dart';
 import 'package:steganosaurus/shared/button_styles.dart';
 import 'package:steganosaurus/shared/card.dart';
+import 'package:steganosaurus/shared/dialog.dart';
 import 'package:steganosaurus/shared/steganography.dart';
 import 'package:steganosaurus/shared/text_styles.dart';
 
@@ -73,6 +74,9 @@ class _BodyState extends State<Body> {
             _image!, messageToEmbed!, widget.bitsToBeEmbeddedPerPixel)
         .then((succeeded) {
       progress?.dismiss();
+
+      dialogBuilder(context, "Generation result:",
+          succeeded ? "Succeeded ✅" : "Failed ❌");
     });
   }
 
